@@ -2,13 +2,15 @@
 
 #include <stdlib.h>
 
-typedef struct {
-    void *elements;
-    size_t element_sz;
-    size_t sz;
-} array;
+#include "array.h"
 
-void *array_get(size_t pos)
-{
-
-}
+struct array {
+    size_t stride;
+    size_t len;
+    char elements[];
+};
+//
+//inline void *array_get(array *arr, size_t pos)
+//{
+//    return &arr->elements[pos * arr->stride];
+//}

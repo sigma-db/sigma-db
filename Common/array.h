@@ -1,28 +1,25 @@
 #pragma once
 
 #include <stdlib.h>
+#include <stdarg.h>
 
-typedef struct {
-    void *elements;
-    size_t element_sz;
-    size_t len;
-} array;
-
-#define array_type(type) \
+#define array_define(type) \
     typedef struct { \
-         type *elements; \
          size_t len; \
-    } array_ ## type; \
+         type elements[]; \
+    } type ## _array; \
     \
-    inline type array_ ## type ## _at(array_ ## type arr, size_t pos) { \
-        return arr.elements[pos]; \
+    inline type ## _array *type ## _array_init(size_t sz) \
+    { \
+        type ## _array *arr = malloc(sizeof(type) * sz + sizeof(size_t)); \
+        arr->len = sz; \
+        return arr; \
     }
 
-#define array_at(arr, pos) (arr.elements[pos])
+#define array_init(type, sz) (type ## _array_init(sz))
 
-array_type(int);
-int test()
-{
-    array_int arr;
-    int a = array_at(arr, 2);
-}
+#define array_at(arr, pos) (&arr->elements[pos])
+
+#define array_get(arr, pos) (arr->elements[pos])
+
+#define array_set(arr, pos, val) do { arr->elements[pos] = val; }

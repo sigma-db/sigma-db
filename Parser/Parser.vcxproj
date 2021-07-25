@@ -148,11 +148,13 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="char_stream.c" />
-    <ClCompile Include="lexer.c" />
+    <ClCompile Include="statement_stream.c" />
+    <ClCompile Include="token_stream.c" />
     <ClCompile Include="parser.c" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="lexer.h" />
+    <ClInclude Include="statement_stream.h" />
+    <ClInclude Include="token_stream.h" />
     <ClInclude Include="parser.h" />
     <ClInclude Include="statement.h">
       <FileType>CppHeader</FileType>

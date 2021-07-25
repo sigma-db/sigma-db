@@ -2,6 +2,7 @@
 
 #include <string.h>
 
+#include "../Common/array.h"
 #include "../Common/string.h"
 
 const enum statement_type { CREATE, INSERT, SELECT, INFO, DUMP };
@@ -57,10 +58,10 @@ struct dump_statement {
 struct statement {
     enum statement_type type;
     union {
-        struct create_statement create;
-        struct insert_statement insert;
-        struct select_statement select;
-        struct info_statement info;
-        struct dump_statement dump;
+        struct create_statement as_create;
+        struct insert_statement as_insert;
+        struct select_statement as_select;
+        struct info_statement as_info;
+        struct dump_statement as_dump;
     };
 };

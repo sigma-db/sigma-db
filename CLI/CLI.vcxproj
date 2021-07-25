@@ -147,7 +147,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="CLI.c" />
+    <ClCompile Include="cli.c" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Database\Database.vcxproj">
