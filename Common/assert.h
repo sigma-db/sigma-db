@@ -25,60 +25,85 @@
 #ifndef ASSERT_H
 #define ASSERT_H
 
-#ifdef NDEBUG
-#define DISABLE_ASSERTIONS
-#endif // !_NDEBUG
+#define ENABLE_ASSERTIONS 1
+#define NOOP ((void)0)
 
-#ifndef DISABLE_ASSERTIONS
+#ifndef ENABLE_ASSERTIONS_IN_RELEASE
+#   define ENABLE_ASSERTIONS_IN_RELEASE 0
+#endif // !ENABLE_ASSERTIONS_IN_RELEASE
+
+#ifdef NDEBUG
+#   define ENABLE_ASSERTIONS ENABLE_ASSERTIONS_IN_RELEASE
+#endif
+
+
+#if ENABLE_ASSERTIONS
 #include <stdlib.h>
 
-#ifndef ASSERTION_VERBOSITY_LEVEL
-#define ASSERTION_VERBOSITY_LEVEL 1
-#endif // !ASSERTION_VERBOSITY_LEVEL
+#ifndef ASSERTION_LEVEL
+#ifdef NDEBUG
+#   define ASSERTION_LEVEL 1
+#else
+#   define ASSERTION_LEVEL 2
+#endif // NDEBUG
+#endif // !ASSERTION_LEVEL
 
 
 #define stringify_(str) #str
 #define stringify(str) stringify_(str)
 
-#define cmd_builder_(prefix, suffix) prefix ## _ ## suffix
-#define cmd_builder(prefix, suffix) cmd_builder_(prefix, suffix)
+#define cmd_builder_(ns, cmd) ns ## _ ## cmd
+#define cmd_builder(ns, cmd) cmd_builder_(ns, cmd)
 #define call(ns, cmd, ...) cmd_builder(ns, cmd)(__VA_ARGS__)
 
 
+#if ASSERTION_LEVEL > 0
+#include <stdio.h> 
+#define MESSAGE_PREFIX "Assertion at " __FILE__ ":" stringify(__LINE__) " failed" 
+#define print_custom(details) fprintf(stderr, MESSAGE_PREFIX ": " details ".\n")
+#define print_generic() fprintf(stderr, MESSAGE_PREFIX ".\n")
+#define print_default() print_generic()
+#define print_() print_default()
+#define call_print(type, ...) call(print, type, __VA_ARGS__)
+#else
+#define call_print(...) NOOP
+#endif // !ASSERTION_LEVEL
+
+
 #define handler_custom(expr) expr
-#define handler_ignore() ((void)0)
-#define handler_default() abort()
+#define handler_abort() abort()
+#define handler_ignore() NOOP
+#if ASSERTION_LEVEL > 1
+#   define handler_default() handler_abort()
+#else
+#   define handler_default() handler_ignore()
+#endif
 #define handler_() handler_default()
 #define call_handler(cmd, ...) call(handler, cmd, __VA_ARGS__)
 
 
-#if ASSERTION_VERBOSITY_LEVEL > 0
-#include <stdio.h>
-#define print_detail(details) fprintf(stderr, "Assertion at %s:%d failed: %s.\n", __FILE__, __LINE__, details)
-#define print_default() fprintf(stderr, "Assertion at %s:%d failed.\n", __FILE__, __LINE__)
-#define print_(condition) message_default(condition)
-#define call_print(type, ...) call(print, type, __VA_ARGS__)
-#else
-#define call_print(...) ((void)0)
-#endif // !VERBOSE_ASSERTIONS
-
-
 #define assertion(condition, message_type, message, handler_type, handler, ...) \
     do { if (!(condition)) { call_print(message_type, message); call_handler(handler_type, handler, __VA_ARGS__); } } while (0)
+#else
+#   define assertion(...) NOOP
+#endif // !ENABLE_ASSERTIONS
 
 
-#define assert(condition) assertion(condition)
+#ifndef DISABLE_DEFAULT_ASSERTIONS
+#define assert_true(predicate, handler_type, handler) \
+    assertion(predicate, default, NULL, handler_type, handler)
+
+#define assert(predicate, handler_type, handler) \
+    assert_true(predicate, handler_type, handler)
 
 #define assert_eq(a, b, handler_type, handler) \
-    assertion(a == b, detail, "Values are not equal (" stringify(a != b) ")", handler_type, handler)
-#else
-#define assertion(...) ((void)0)
-#endif // !DISABLE_ASSERTIONS
+    assertion(a == b, custom, "Values are not equal (" stringify(a != b) ")", handler_type, handler)
+
+#define assert_in_bounds(inf, x, sup, handler_type, handler) \
+    assertion(inf <= x && x <= sup, custom, "Value " #x " is not in range [" #inf ", " #sup ")", handler_type, handler)
+
+#define assert_not_null(expr, handler_type, handler) \
+    assertion(expr != NULL, custom, #expr " is NULL", handler_type, handler)
+#endif // !DISABLE_DEFAULT_ASSERTIONS
 
 #endif // !ASSERT_H
-
-int test()
-{
-    assertion(1 == 2, detail, "not equal", custom, return -2);
-    assert_eq(1, 9);
-}
