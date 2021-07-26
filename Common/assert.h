@@ -27,6 +27,7 @@
 
 #define ENABLE_ASSERTIONS 1
 #define NOOP ((void)0)
+#define ERROR_CODE -1
 
 #ifndef ENABLE_ASSERTIONS_IN_RELEASE
 #   define ENABLE_ASSERTIONS_IN_RELEASE 0
@@ -71,6 +72,7 @@
 
 
 #define handler_custom(expr) expr
+#define handler_return(code) return code
 #define handler_abort() abort()
 #define handler_ignore() NOOP
 #if ASSERTION_LEVEL > 1
@@ -99,7 +101,7 @@
 #define assert_eq(a, b, handler_type, handler) \
     assertion(a == b, custom, "Values are not equal (" stringify(a != b) ")", handler_type, handler)
 
-#define assert_in_bounds(inf, x, sup, handler_type, handler) \
+#define assert_within_bounds(inf, x, sup, handler_type, handler) \
     assertion(inf <= x && x <= sup, custom, "Value " #x " is not in range [" #inf ", " #sup ")", handler_type, handler)
 
 #define assert_not_null(expr, handler_type, handler) \
@@ -107,3 +109,27 @@
 #endif // !DISABLE_DEFAULT_ASSERTIONS
 
 #endif // !ASSERT_H
+
+#define delete_args(...)
+#define keep_args(...) __VA_ARGS__
+#define expand(v) v
+
+#define command_name_ handler_ignore delete_args(
+#define command_args_ keep_args(
+
+#define command_name_return handler_return delete_args(
+#define command_args_return keep_args(
+
+#define command_name(cmd) command_name_ ## cmd)
+#define command_args(cmd) command_args_ ## cmd)
+
+#define command(cmd) expand(command_name(cmd)(command_args(cmd)))
+
+#define assertion1(test, cmd1, cmd2) \
+    do { if (!(test)) { command(cmd1); command(cmd2); } } while (0)
+
+int test()
+{
+    assertion1(1 == 1);
+    assertion1(1 == 2, return -8);
+}
