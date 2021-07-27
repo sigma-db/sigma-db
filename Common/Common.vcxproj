@@ -21,6 +21,7 @@
   <ItemGroup>
     <ClInclude Include="array.h" />
     <ClInclude Include="assert.h" />
+    <ClInclude Include="dynamic_assert.h" />
     <ClInclude Include="string.h" />
   </ItemGroup>
   <ItemGroup>

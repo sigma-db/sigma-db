@@ -8,10 +8,8 @@
 
 #include "../Common/assert.h"
 
-extern int error;
-
 #define assert_has_more(cs) \
-    assertion(!cs_end(cs), custom, "No more characters in char_stream " #cs ".")
+    assertion(!cs_end(cs), custom, "No more characters in char_stream " #cs ".", default, NULL)
 
 struct char_stream {
     const char *buf;
@@ -58,7 +56,7 @@ sigma_char cs_next(struct char_stream *cs)
         return c & 0x001FFFFF; // (1 << 21) - 1
     }
     // should not ever happen as we expect valid input
-    return -1;
+    assert_fail("Input is not valid UTF-8", return -1);
 }
 
 sigma_char cs_peek_next(struct char_stream *cs)

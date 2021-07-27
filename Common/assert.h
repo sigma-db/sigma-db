@@ -76,16 +76,16 @@
 #define handler_abort() abort()
 #define handler_ignore() NOOP
 #if ASSERTION_LEVEL > 1
-#   define handler_default() handler_abort()
+#   define handler_default(...) handler_abort()
 #else
-#   define handler_default() handler_ignore()
+#   define handler_default(...) handler_ignore()
 #endif
-#define handler_() handler_default()
+#define handler_(...) handler_default(__VA_ARGS__)
 #define call_handler(cmd, ...) call(handler, cmd, __VA_ARGS__)
 
 
-#define assertion(condition, message_type, message, handler_type, handler, ...) \
-    do { if (!(condition)) { call_print(message_type, message); call_handler(handler_type, handler, __VA_ARGS__); } } while (0)
+#define assertion(condition, message_type, message, handler_type, handler) \
+    do { if (!(condition)) { call_print(message_type, message); call_handler(handler_type, handler); } } while (0)
 #else
 #   define assertion(...) NOOP
 #endif // !ENABLE_ASSERTIONS
@@ -106,30 +106,25 @@
 
 #define assert_not_null(expr, handler_type, handler) \
     assertion(expr != NULL, custom, #expr " is NULL", handler_type, handler)
+
+#define assert_fail(message, handler) \
+    assertion(0, custom, message, custom, handler)
 #endif // !DISABLE_DEFAULT_ASSERTIONS
 
 #endif // !ASSERT_H
 
-#define delete_args(...)
-#define keep_args(...) __VA_ARGS__
-#define expand(v) v
-
-#define command_name_ handler_ignore delete_args(
-#define command_args_ keep_args(
-
-#define command_name_return handler_return delete_args(
-#define command_args_return keep_args(
-
-#define command_name(cmd) command_name_ ## cmd)
-#define command_args(cmd) command_args_ ## cmd)
-
-#define command(cmd) expand(command_name(cmd)(command_args(cmd)))
-
-#define assertion1(test, cmd1, cmd2) \
-    do { if (!(test)) { command(cmd1); command(cmd2); } } while (0)
-
-int test()
-{
-    assertion1(1 == 1);
-    assertion1(1 == 2, return -8);
-}
+/* 
+ * The general syntax to invoke assertions is as follows:
+ * 
+ *   assert(<test>, <cmd>, <cmd>, ...)
+ * 
+ * <test> can be any boolean expression, i.e. it must evaluates to either true or false
+ * <cmd> can be any of { print, abort, exit, return, goto } which are executed in-order in case the assertion fails
+ *       Some commands take a parameter which is separated from the command name by a space, e.g. `return -1`
+ * 
+ * Only a few assertions deviate from this ruleset by not taking a <test> parameter, e.g. assert_fail
+ * 
+ * Default values: 
+ * 
+ * TODO: rename to assert_const_fail or assert_static_fail?
+ */
