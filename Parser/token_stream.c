@@ -1,6 +1,9 @@
 #include <stdlib.h>
 #include <stdbool.h>
+#include <ctype.h>
+#include <string.h>
 
+#include "../Common/assert.h"
 #include "char_stream.h"
 #include "token_stream.h"
 
@@ -8,18 +11,21 @@ struct token_stream {
     struct char_stream *cs;
 };
 
+static int ts_parse_string(struct token_stream *ts, const char **str);
+static void ts_skip_whitespace(struct token_stream *ts);
+
 int ts_init(struct token_stream **ts, const char *buf, size_t buf_len)
 {
     *ts = malloc(sizeof(struct token_stream));
     if (*ts == NULL) {
-        return EXIT_FAILURE;
+        return -1;
     }
     int err = cs_init(&(*ts)->cs, buf, buf_len);
-    if (err != EXIT_SUCCESS) {
+    if (err != 0) {
         free(ts);
-        return EXIT_FAILURE;
+        return -1;
     }
-    return EXIT_SUCCESS;
+    return 0;
 }
 
 struct token ts_next(struct token_stream *ts)
@@ -39,4 +45,24 @@ struct token ts_peek(struct token_stream *ts)
 inline bool ts_end(struct token_stream *ts)
 {
     return ts_peek(ts).type == EOF;
+}
+
+static int ts_parse_string(struct token_stream *ts, const char **str)
+{
+    struct char_stream *cs = ts->cs;
+    ts_skip_whitespace(ts);
+    if (!cs_end(cs) && cs_peek_next(cs) == '"') {
+    }
+}
+
+static void ts_skip_whitespace(struct token_stream *ts)
+{
+    struct char_stream *cs = ts->cs;
+    while (!cs_end(cs)) {
+        sigma_char c = cs_next(cs);
+        if (!isspace(c)) {
+            cs_seek(cs, -1);
+            break;
+        }
+    }
 }

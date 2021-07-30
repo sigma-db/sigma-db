@@ -2,7 +2,9 @@
 
 #include <stdbool.h>
 
-enum token_type { EOF };
+enum token_type {
+    END
+};
 
 struct token {
     enum token_type type;

@@ -25,4 +25,5 @@ int test()
 {
     assertion1(1 == 1);
     assertion1(1 == 2, return -8);
+
 }

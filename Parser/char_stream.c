@@ -20,7 +20,7 @@ struct char_stream {
 int cs_init(struct char_stream **cs, const char *buf, size_t buf_sz)
 {
     *cs = malloc(sizeof(struct char_stream));
-    assert_not_null(*cs, return, -1);
+    //assert_not_null(*cs, return, -1);
     **cs = (struct char_stream){
         .buf = buf,
         .buf_len = buf_sz,
@@ -70,7 +70,7 @@ sigma_char cs_peek_next(struct char_stream *cs)
 
 int cs_peek(struct char_stream *cs, size_t k, sigma_char *dst)
 {
-    assert_not_null(dst);
+    //assert_not_null(dst);
     int ret = 0;
     size_t pos = cs->pos;
     while (k-- > 0) {
@@ -84,7 +84,7 @@ int cs_peek(struct char_stream *cs, size_t k, sigma_char *dst)
 int cs_seek(struct char_stream *cs, int offset)
 {
     int dst = (int)cs->pos + offset;
-    assert_within_bounds(0, dst, cs->buf_len);
+    //assert_within_bounds(0, dst, cs->buf_len);
     cs->pos += dst;
     return 0;
 }
@@ -96,5 +96,5 @@ inline size_t cs_pos(struct char_stream *cs)
 
 inline bool cs_end(struct char_stream *cs)
 {
-    return cs->pos >= cs->buf_len;
+    return cs->pos >= cs->buf_len || *cs->buf == 0;
 }
