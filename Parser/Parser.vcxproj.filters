@@ -20,7 +20,10 @@
     <ClCompile Include="parser.c">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="statement_stream.c">
+    <ClCompile Include="statement.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="ctype.c">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -37,7 +40,7 @@
     <ClInclude Include="token_stream.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="statement_stream.h">
+    <ClInclude Include="ctype.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

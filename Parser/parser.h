@@ -2,8 +2,12 @@
 
 #include <stdlib.h>
 
-typedef struct statement *statement;
+typedef struct parser_context *parser_context_t;
 
-statement parse(const char *str, size_t str_len);
+typedef struct statement *statement_t;
 
-void parser_dump(statement stmt);
+int parser_create(parser_context_t *ctx, const char *qstr, size_t qstr_len);
+
+void parser_destroy(parser_context_t ctx);
+
+statement_t parser_next(parser_context_t ctx);

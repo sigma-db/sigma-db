@@ -1,26 +1,23 @@
-#include <stdlib.h>
-#include <stdbool.h>
-#include <ctype.h>
 #include <string.h>
 
-#include "../Common/assert.h"
 #include "char_stream.h"
 #include "token_stream.h"
+#include "ctype.h"
 
 struct token_stream {
     struct char_stream *cs;
 };
 
-static int ts_parse_string(struct token_stream *ts, const char **str);
-static void ts_skip_whitespace(struct token_stream *ts);
+static int parse_string(struct token_stream *ts, const char **str);
+static void skip_whitespace(struct token_stream *ts);
 
-int ts_init(struct token_stream **ts, const char *buf, size_t buf_len)
+int token_stream_create(struct token_stream **ts, const char *buf, size_t buf_len)
 {
     *ts = malloc(sizeof(struct token_stream));
     if (*ts == NULL) {
         return -1;
     }
-    int err = cs_init(&(*ts)->cs, buf, buf_len);
+    int err = char_stream_create(&(*ts)->cs, buf, buf_len);
     if (err != 0) {
         free(ts);
         return -1;
@@ -28,40 +25,61 @@ int ts_init(struct token_stream **ts, const char *buf, size_t buf_len)
     return 0;
 }
 
-struct token ts_next(struct token_stream *ts)
+void token_stream_destroy(struct token_stream *ts)
 {
-    //return 0;
+    char_stream_destroy(ts->cs);
+    free(ts);
 }
 
-struct token ts_peek(struct token_stream *ts)
+struct token token_stream_next(struct token_stream *ts)
 {
-    const size_t before = cs_pos(ts->cs);
-    const struct token result = ts_next(ts);
-    const int offset = (int)(cs_pos(ts->cs) - before);
-    cs_seek(ts->cs, -offset);
+    size_t length = 1;
+    char32_t c = char_stream_next(ts->cs);
+    switch (character_class(c)) {
+    case CC_DIGIT:
+        while (isdigit(qstr[length])) length++;
+        *token_type = TK_LITERAL_INTEGER;
+        break;
+    case CC_NULL:
+        *token_type = TK_END;
+        break;
+    case CC_OTHER:
+        length = 0;
+        *token_type = TK_ERROR;
+        break;
+    }
+    return length;
+}
+
+struct token token_stream_peek(struct token_stream *ts)
+{
+    const size_t before = char_stream_pos(ts->cs);
+    const struct token result = token_stream_next(ts);
+    const int offset = (int)(char_stream_pos(ts->cs) - before);
+    char_stream_advance(ts->cs, -offset);
     return result;
 }
 
-inline bool ts_end(struct token_stream *ts)
+inline bool token_stream_end(struct token_stream *ts)
 {
-    return ts_peek(ts).type == EOF;
+    return token_stream_peek(ts).type == EOF;
 }
 
-static int ts_parse_string(struct token_stream *ts, const char **str)
+static int parse_string(struct token_stream *ts, const char **str)
 {
     struct char_stream *cs = ts->cs;
-    ts_skip_whitespace(ts);
-    if (!cs_end(cs) && cs_peek_next(cs) == '"') {
+    skip_whitespace(ts);
+    if (!char_stream_has_more(cs) && char_stream_peek_next(cs) == '"') {
+        while 
     }
 }
 
-static void ts_skip_whitespace(struct token_stream *ts)
+static void skip_whitespace(struct token_stream *ts)
 {
     struct char_stream *cs = ts->cs;
-    while (!cs_end(cs)) {
-        sigma_char c = cs_next(cs);
+    while (char_stream_has_more(cs)) {
+        sigma_char_t c = char_stream_next(cs);
         if (!isspace(c)) {
-            cs_seek(cs, -1);
             break;
         }
     }

@@ -2,18 +2,20 @@
 
 #include <string.h>
 
-#include "../Common/array.h"
-#include "../Common/string.h"
+#define MAX_RELATION_NAME_LENGTH 64
+#define MAX_RELATION_ARITY 64
+#define MAX_VAR_NAME_LENGTH 32
 
-const enum statement_type { CREATE, INSERT, SELECT, INFO, DUMP };
-const enum tuple_type { NAMED, UNNAMED };
-const enum value_type { VARIABLE, LITERAL };
+enum statement_type { CREATE, INSERT, SELECT, INFO, DUMP };
+enum tuple_type { NAMED, UNNAMED };
+enum value_type { VARIABLE, LITERAL };
+enum data_type { INT, CHAR, STRING, BOOL };
 
 struct value {
     enum value_type type;
     union {
         void *value;
-        string variable;
+        const char variable[MAX_VAR_NAME_LENGTH];
     };
 };
 
@@ -33,13 +35,20 @@ struct tuple {
     };
 };
 
+struct attribute {
+    const char *name;
+    size_t width;
+    enum data_type type;
+};
+
 struct create_statement {
-    void *val;
+    const char *rel_name;
+    size_t arity;
+    struct attribute attrs[];
 };
 
 struct insert_statement {
     const char *rel_name;
-    const size_t rel_name_len;
     struct tuple tuple;
 };
 
@@ -48,11 +57,11 @@ struct select_statement {
 };
 
 struct info_statement {
-    void *val;
+    const char *rel_name;
 };
 
 struct dump_statement {
-    void *val;
+    const char *rel_name;
 };
 
 struct statement {
@@ -65,3 +74,5 @@ struct statement {
         struct dump_statement as_dump;
     };
 };
+
+const char *statement_tostring(struct statement *stmt);
