@@ -10,14 +10,14 @@
 #include <stdbool.h>
 #include <uchar.h>
 
-#define UNICODE
-#define CHAR_STREAM_LOOKAHEAD 1 // NOTE: set return type of peek function accordingly
+#define PARSER_UTF8_ENABLED
+#define CHAR_STREAM_LOOKAHEAD 1
 
-#ifdef UNICODE
+#ifdef PARSER_UTF8_ENABLED
 #   define CHAR_TYPE char32_t
 #else
 #   define CHAR_TYPE char
-#endif // UNICODE
+#endif
 
 typedef CHAR_TYPE sigma_char_t;
 
@@ -33,16 +33,16 @@ void char_stream_destroy(struct char_stream *cs);
 // Returns the next code point from the buffer or -1 when an error occurred during decoding
 sigma_char_t char_stream_next(struct char_stream *cs);
 
-// Retrieves the k-th next character (if available) without forwarding the stream or -1 when an error occurred during decoding
+// Returns the k-th next character (if available) without forwarding the stream
 sigma_char_t char_stream_peek(struct char_stream *cs, size_t k);
 
-// Forwards the stream by `delta` code points and returns the enxt code point after forwarding
+// Forwards the stream by k code points if possible and returns the number of code points actually skipped
 // 
 // Note that advancing past the terminating null-character (or even past the underlying buffer's end) 
 // will eventually lead to errors on subsequent memory accesses for strings of unspecified size (i.e. with bufsz = 0)
 size_t char_stream_advance(struct char_stream *cs, size_t delta);
 
-// Current (byte) offset from the beginning
+// Current byte offset from the beginning
 size_t char_stream_pos(struct char_stream *cs);
 
 bool char_stream_has_more(struct char_stream *cs);
