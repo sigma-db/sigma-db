@@ -6,20 +6,23 @@
 #define iteration_invariant(it) \
     ((it)->begin <= (it)->current && ((it)->end == NULL || (it)->current < (it)->end))
 
-// Checks whether `end != NULL -> current < end` holds
-// That is, if the string's size is known in advance, the current position must be strictly before the end
+// Checks whether `*current != 0` and `end != NULL -> current < end` holds.
+// 
+// That is, the current value must not be '\0' and if the string's size 
+// is known in advance, the current position must be strictly before the end.
 #define iterator_has_more(it) \
-    ((it)->end == NULL || (it)->current < (it)->end) // TODO: check if \0 for null-terminated
+    ((*(it)->current != 0) && ((it)->end == NULL || (it)->current < (it)->end))
 
 #define index(cs, k) \
-    (((cs)->pos + k) % (CHAR_STREAM_LOOKAHEAD + 1))
+    (((cs)->pos + k) % CHAR_STREAM_LOOKAHEAD)
 
-#define current(cs) \
+#define next(cs) \
     ((cs)->cache[(cs)->pos])
 
 #ifdef PARSER_UTF8_ENABLED
-#define code_point_size(c) \
-    (c < 0x80 ? 1 : c < 0x800 ? 2 : c < 0x10000 ? 3 : 4)
+#   define code_point_size(c) (c < 0x80 ? 1 : c < 0x800 ? 2 : c < 0x10000 ? 3 : 4)
+#else
+#   define code_point_size(c) 1
 #endif // PARSER_UTF8_ENABLED
 
 struct char_stream {
@@ -29,10 +32,11 @@ struct char_stream {
     const char *current; // invariant: begin <= buf < end (with end = 0 meaning infty)
 
     // char stream-specific fields
-    size_t pos; // index into `values`, i.e. 0 <= pos <= CHAR_STREAM_LOOKAHEAD
-    sigma_char_t cache[CHAR_STREAM_LOOKAHEAD + 1];
+    size_t pos; // index into `cache`, i.e. 0 <= pos < CHAR_STREAM_LOOKAHEAD
+    sigma_char_t cache[CHAR_STREAM_LOOKAHEAD];
 };
 
+static void advance(struct char_stream *cs);
 static sigma_char_t next_code_point(struct char_stream *cs);
 
 int char_stream_create(struct char_stream **cs, const char *buf, size_t bufsz)
@@ -49,13 +53,11 @@ int char_stream_create(struct char_stream **cs, const char *buf, size_t bufsz)
         .end = bufsz > 0 ? buf + bufsz : NULL,
         .current = buf,
         .pos = 0,
-        .cache = { 0 },
     };
 
     assert(iteration_invariant(*cs));
 
-    char_stream_advance(*cs, CHAR_STREAM_LOOKAHEAD + 1);
-    (*cs)->pos = 0;
+    char_stream_advance(*cs, CHAR_STREAM_LOOKAHEAD);
 
     return 0;
 }
@@ -67,75 +69,69 @@ void char_stream_destroy(struct char_stream *cs)
 
 sigma_char_t char_stream_next(struct char_stream *cs)
 {
-    assert(current(cs) > 0);
+    assert(next(cs) > 0);
 
-    sigma_char_t value = current(cs);
-    char_stream_advance(cs, 1);
+    sigma_char_t value = next(cs);
+    advance(cs);
     return value;
 }
 
 sigma_char_t char_stream_peek(struct char_stream *cs, size_t k)
 {
     assert(0 < k && k <= CHAR_STREAM_LOOKAHEAD);
-    return cs->cache[index(cs, k)];
+
+    return cs->cache[index(cs, k - 1)];
 }
 
-size_t char_stream_advance(struct char_stream *cs, size_t delta)
+void char_stream_advance(struct char_stream *cs, size_t delta)
 {
-    /*
-     * I considered a special treatment for k = 1, e.g. using conditional compilation,
-     * but apart from the two superfluous checks for i < k, there does not seem to be
-     * any overhead in the current solution that would justify the obfuscation
-     */
-
-    int i = 0; // number of code points read
-    while (i < delta && iterator_has_more(cs)) { // BUG: we might still skip within the buffer although the iterator is done
-        if ((cs->cache[cs->pos] = next_code_point(cs)) < 0) {
-            break;
-        }
-        cs->pos = index(cs, 1);
-        i += 1;
+    while (delta-- > 0) {
+        advance(cs);
     }
-    // 2nd loop to solve above bug?
-
-    assert(iteration_invariant(cs) || cs->current == cs->end); // in case we're done, we must be exactly one past the last element
-
-    return i;
 }
 
 size_t char_stream_pos(struct char_stream *cs)
 {
-#ifdef PARSER_UTF8_ENABLED
-    // Subtract widths of all cached code points from (cs->current - cs->begin)
+    // Sum size of all currently cached coint points, excluding terminating null character(s) if present
     size_t sum = 0;
-    for (size_t i = 0; i <= CHAR_STREAM_LOOKAHEAD; i++) {
-        sum += code_point_size(cs->cache[i]);
+    for (size_t i = 0; i < CHAR_STREAM_LOOKAHEAD; i++) {
+        sigma_char_t cp = cs->cache[index(cs, i)];
+        if (cp <= 0) {
+            break; // stop after encountering the first null character (or error)
+        }
+        sum += code_point_size(cp);
     }
+    // Subtract widths of all cached code points from (cs->current - cs->begin)
     return cs->current - cs->begin - sum;
-#else
-    return cs->current - cs->begin;
-#endif // PARSER_UTF8_ENABLED
 }
 
 bool char_stream_has_more(struct char_stream *cs)
 {
-    return current(cs) > 0;
+    return next(cs) > 0;
+}
+
+static void advance(struct char_stream *cs)
+{
+    cs->cache[cs->pos] = iterator_has_more(cs) ? next_code_point(cs) : 0;
+    cs->pos = index(cs, 1);
+
+    // in case we're done, we must be exactly one past the last element
+    assert(iteration_invariant(cs) || cs->current == cs->end);
 }
 
 // Returns the next byte from the input and forwards by one byte
-// Make sure this function is inlined in the assembly
 static char next_byte(struct char_stream *cs)
 {
     assert(iterator_has_more(cs));
+
     return *cs->current++;
 }
 
-// TODO: Verify this function is referenced only once and thus gets inlined as well
 static sigma_char_t next_code_point(struct char_stream *cs)
 {
     // 1 byte (ASCII)
     sigma_char_t c = next_byte(cs);
-    if (c < 0x80) {
+    if (c < 0x80) { // BUG: always true since 0x80 == -128 (make next_byte return unsigned char?)
         return c;
     }
 #ifdef PARSER_UTF8_ENABLED

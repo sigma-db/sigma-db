@@ -24,23 +24,21 @@ typedef CHAR_TYPE sigma_char_t;
 struct char_stream;
 
 // `buf` is a null-terminated string of at most bufsz chars including the terminating \0 char
-// For bufsz = 0, internal bounds-checking is deactivated (beware of buffer overflows)
+// Set bufsz = 0 if the buffer's size is not known in advance (beware of buffer overflows)
 int char_stream_create(struct char_stream **cs, const char *buf, size_t bufsz);
 
 // Releases internal resources but not the string itself
 void char_stream_destroy(struct char_stream *cs);
 
-// Returns the next code point from the buffer or -1 when an error occurred during decoding
+// Returns the next code point from the buffer
+// The return value is only defined when char_stream_has_more(cs) == true
 sigma_char_t char_stream_next(struct char_stream *cs);
 
 // Returns the k-th next character (if available) without forwarding the stream
 sigma_char_t char_stream_peek(struct char_stream *cs, size_t k);
 
-// Forwards the stream by k code points if possible and returns the number of code points actually skipped
-// 
-// Note that advancing past the terminating null-character (or even past the underlying buffer's end) 
-// will eventually lead to errors on subsequent memory accesses for strings of unspecified size (i.e. with bufsz = 0)
-size_t char_stream_advance(struct char_stream *cs, size_t delta);
+// Forwards the stream by k code points
+void char_stream_advance(struct char_stream *cs, size_t delta);
 
 // Current byte offset from the beginning
 size_t char_stream_pos(struct char_stream *cs);
