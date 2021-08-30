@@ -29,7 +29,7 @@ SUITE(sample)
 
 This way, we define two *tests* named `first` and `second` and a *suite* named `sample` that runs the two tests.
 Note that the names of tests and suits must all be valid C identifiers.
-This file by itself defines the tests and the suit but does not execute them.
+This file by itself defines the tests and the suite but does not execute them.
 To accomplish that, continuing from the above example, create another code file `main.c` and insert:
 
 ```C
@@ -56,3 +56,9 @@ A test can be part of multiple suits and consequently a file can contain multipl
 
 Personally, I prefer to "import" all suits from all files in `main.c` and execute them inside the `main` function.
 This way, `main.c` serves as a kind of table of contents and also the number of files is kept low.
+
+## Platforms
+
+I developed and tested the code on Windows 10 using both, Microsoft Visual C++ 2019 with C17 support turned on, and Clang 12.
+In the future, I plan to add Linux support.
+At the moment, I guess that due to Microsoft's implementation of `strtok_s` differing from the one on Linux, there will be compiler errors.
