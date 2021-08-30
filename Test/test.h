@@ -4,10 +4,18 @@
 #define IMPORT(name) \
     void name()
 
-#define EXPORT(name, ...) \
+#define EXPORT(name) \
     void name() \
     { \
-        test_run_collection(#name, #__VA_ARGS__, __VA_ARGS__); \
+        suite_ ## name(); \
+    }
+
+#define SUITE(name, ...) \
+    static void collection_ ## name() \
+    { \
+        test_f tests[] = { __VA_ARGS__ }; \
+        char names[] = #__VA_ARGS__; \
+        test_run_collection(#name, names, tests); \
     }
 
 #define TEST(name) \
@@ -29,4 +37,4 @@ typedef void (*test_f)(struct context);
 /**
  * Runs a collection of tests and returns the number of failed tests
  */
-int test_run_collection(const char *coll_name, const char *test_names, ...);
+int test_run_collection(const char *coll_name, char test_names[], test_f tests[]);

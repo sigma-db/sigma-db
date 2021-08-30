@@ -1,8 +1,10 @@
 #include "test.h"
 
-IMPORT(sample);
+IMPORT(SampleSuite);
 
 int main(void)
 {
-    sample();
+    SampleSuite();
+
+    return EXIT_SUCCESS;
 }
