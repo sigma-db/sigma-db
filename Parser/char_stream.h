@@ -11,7 +11,7 @@
 #include <uchar.h>
 
 #define PARSER_UTF8_ENABLED
-#define CHAR_STREAM_LOOKAHEAD 1
+#define CHAR_STREAM_LOOKAHEAD 4
 
 #ifdef PARSER_UTF8_ENABLED
 #   define CHAR_TYPE char32_t
@@ -40,7 +40,7 @@ sigma_char_t char_stream_peek(struct char_stream *cs, size_t k);
 // Forwards the stream by k code points
 void char_stream_advance(struct char_stream *cs, size_t delta);
 
-// Current byte offset from the beginning
+// Gets the byte offset of the next code point (if any)
 size_t char_stream_pos(struct char_stream *cs);
 
 bool char_stream_has_more(struct char_stream *cs);

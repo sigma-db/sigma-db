@@ -4,7 +4,7 @@
 
 #define MAX_RELATION_NAME_LENGTH 64
 #define MAX_RELATION_ARITY 64
-#define MAX_VAR_NAME_LENGTH 32
+#define MAX_IDENTIFIER_LENGTH 32
 
 enum statement_type { CREATE, INSERT, SELECT, INFO, DUMP };
 enum tuple_type { NAMED, UNNAMED };
@@ -14,8 +14,8 @@ enum data_type { INT, CHAR, STRING, BOOL };
 struct value {
     enum value_type type;
     union {
-        void *value;
-        const char variable[MAX_VAR_NAME_LENGTH];
+        void *literal;
+        const char variable[MAX_IDENTIFIER_LENGTH];
     };
 };
 
@@ -30,9 +30,10 @@ struct unnamed_tuple {
 struct tuple {
     enum tuple_type type;
     union {
-        struct named_tuple named;
-        struct unnamed_tuple unnamed;
+        struct named_tuple as_named;
+        struct unnamed_tuple as_unnamed;
     };
+    size_t arity;
 };
 
 struct attribute {

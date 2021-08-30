@@ -11,14 +11,14 @@ struct token_stream {
 static int parse_string(struct token_stream *ts, const char **str);
 static void skip_whitespace(struct token_stream *ts);
 
-int token_stream_create(struct token_stream **ts, const char *buf, size_t buf_len)
+int token_stream_create(struct token_stream **ts, const char *buf, size_t bufsz)
 {
     *ts = malloc(sizeof(struct token_stream));
     if (*ts == NULL) {
         return -1;
     }
-    int err = char_stream_create(&(*ts)->cs, buf, buf_len);
-    if (err != 0) {
+    int error = char_stream_create(&(*ts)->cs, buf, bufsz);
+    if (error) {
         free(ts);
         return -1;
     }
@@ -60,9 +60,9 @@ struct token token_stream_peek(struct token_stream *ts)
     return result;
 }
 
-inline bool token_stream_end(struct token_stream *ts)
+inline bool token_stream_has_more(struct token_stream *ts)
 {
-    return token_stream_peek(ts).type == EOF;
+    return token_stream_peek(ts).type == TK_END;
 }
 
 static int parse_string(struct token_stream *ts, const char **str)
