@@ -1,22 +1,15 @@
 #include <stdlib.h>
 #include <setjmp.h>
 
-#define IMPORT(name) \
-    void name()
-
-#define EXPORT(name) \
-    void name() \
-    { \
-        suite_ ## name(); \
-    }
-
-#define SUITE(name, ...) \
-    static void collection_ ## name() \
-    { \
+#define RUN(...) \
+    do { \
         test_f tests[] = { __VA_ARGS__ }; \
         char names[] = #__VA_ARGS__; \
-        test_run_collection(#name, names, tests); \
-    }
+        test_run_collection(__func__, names, tests); \
+    } while (0)
+
+#define SUITE(name) \
+    void name()
 
 #define TEST(name) \
     static void name(struct context ctx)

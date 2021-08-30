@@ -10,6 +10,7 @@ TEST(second)
     EXPECT(1 == 2);
 }
 
-SUITE(SampleSuite, first, second);
-
-EXPORT(SampleSuite);
+SUITE(SampleSuite)
+{
+    RUN(first, second);
+}

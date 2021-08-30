@@ -1,6 +1,6 @@
 #include "test.h"
 
-IMPORT(SampleSuite);
+SUITE(SampleSuite);
 
 int main(void)
 {
