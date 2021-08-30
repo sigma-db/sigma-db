@@ -9,7 +9,7 @@
     } while (0)
 
 #define SUITE(name) \
-    void name()
+    void name(void)
 
 #define TEST(name) \
     static void name(struct context ctx)

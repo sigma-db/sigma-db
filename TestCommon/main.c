@@ -1,10 +1,10 @@
 #include "test.h"
 
-SUITE(SampleSuite);
+SUITE(CharStreamTest);
 
 int main(void)
 {
-    SampleSuite();
+    CharStreamTest();
 
     return EXIT_SUCCESS;
 }

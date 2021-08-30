@@ -1,16 +1,44 @@
 #include "test.h"
 
-TEST(first)
+#include "../Parser/char_stream.h"
+
+struct char_stream *cs;
+
+TEST(init)
 {
-    EXPECT(2 == 2);
+    int error = char_stream_create(&cs, "David Luis Wiegandt", 0);
+    EXPECT(!error && cs != NULL);
 }
 
-TEST(second)
+TEST(peek)
 {
-    EXPECT(1 == 2);
+    sigma_char_t cp;
+
+    cp = char_stream_peek(cs, 5);
+    EXPECT(cp == 'd');
+
+    char_stream_advance(cs, 7);
+    cp = char_stream_next(cs);
+    EXPECT(cp == 'u');
+
+    cp = char_stream_peek(cs, 5);
+    EXPECT(cp == 'i');
 }
 
-SUITE(SampleSuite)
+TEST(iterate)
 {
-    RUN(first, second);
+    for (size_t i = 8; char_stream_has_more(cs); i++) {
+        size_t pos = char_stream_pos(cs);
+        EXPECT(pos == i);
+
+        sigma_char_t cp = char_stream_next(cs);
+        EXPECT(cp >= 0);
+    }
+    EXPECT(!char_stream_has_more(cs));
+}
+
+SUITE(CharStreamTest)
+{
+    // TODO: Add tests for UTF-8 strings with multi-byte characters
+    RUN(init, peek, iterate);
 }
