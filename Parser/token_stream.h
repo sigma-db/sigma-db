@@ -11,17 +11,38 @@
 
 enum token_type {
     TK_ERROR,
-    TK_LITERAL_INTEGER,
+
+    // brackets
+    TK_LPAREN,
+    TK_RPAREN,
+    TK_LBRACKET,
+    TK_RBRACKET,
+    TK_RBRACE,
+    TK_LBRACE,
+
+    // literal
+    TK_LITERAL_INT,
+    TK_LITERAL_STRING,
+    TK_LITERAL_CHAR,
+
+    // ignored
     TK_SPACE,
-    TK_END
+    TK_COMMENT,
+    TK_END,
 };
 
 struct token {
     enum token_type type;
-    sigma_char_t value[MAX_TOKEN_LENGTH];
+    size_t length;
+    union {
+        sigma_char_t value[MAX_TOKEN_LENGTH];
+        sigma_char_t *reference;
+    };
 };
 
 struct token_stream;
+
+extern const struct token error_token;
 
 int token_stream_create(struct token_stream **ts, const char *buf, size_t bufsz);
 

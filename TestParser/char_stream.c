@@ -2,7 +2,7 @@
 
 #include "../Parser/char_stream.h"
 
-struct char_stream *cs;
+static struct char_stream *cs;
 
 TEST(init)
 {
@@ -37,8 +37,10 @@ TEST(iterate)
     EXPECT(!char_stream_has_more(cs));
 }
 
+// TODO: Add tests for UTF-8 strings with multi-byte characters
+
 SUITE(test_char_stream)
 {
-    // TODO: Add tests for UTF-8 strings with multi-byte characters
+    // TODO: Add macros BEFORE({ <code> }) and AFTER({ <code> }) that define code blocks executed before and after every test
     RUN(init, peek, iterate);
 }

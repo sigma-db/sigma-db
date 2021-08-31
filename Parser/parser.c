@@ -1,7 +1,6 @@
 #include <stdlib.h>
 
 #include "parser.h"
-
 #include "token_stream.h"
 
 struct parser_context {
@@ -28,29 +27,17 @@ int parser_create(struct parser_context **ctx, const char *qstr, size_t qstr_len
 
 void parser_destroy(struct parser_context *ctx)
 {
+    token_stream_destroy(ctx->tokens);
     free(ctx);
 }
 
 struct statement *parser_next(struct parser_context *ctx)
 {
-    struct token token = token_stream_next(ctx->tokens);
-
     struct statement result;
-
-    //switch (token.type) {
-    //case TK_LITERAL_INTEGER:
-    //    int value = ctx->input[0] - '0';
-    //    for (int i = 1; i < tk_len; i++) {
-    //        value = value * 10 + ctx->input[i] - '0';
-    //    }
-    //    result = (struct statement){ .type = tk_type, .as_int = value };
-    //    break;
-    //case TK_END:
-    //    result = (struct statement){ .type = tk_type, .as_int = 0 };
-    //    break;
+    //int value = ctx->input[0] - '0';
+    //for (int i = 1; i < tk_len; i++) {
+    //    value = value * 10 + ctx->input[i] - '0';
     //}
-
-    //ctx->input += tk_len;
     return &result;
 }
 
@@ -61,9 +48,11 @@ bool parser_has_more(struct parser_context *ctx)
 
 static size_t skip_whitespace(struct parser_context *ctx)
 {
-    if (token_stream_peek(ctx->tokens, 1).type == TK_SPACE) {
-        token_stream_next(ctx->tokens);
-        return 1;
+    if (token_stream_has_more(ctx->tokens)) {
+        if (token_stream_peek(ctx->tokens, 1).type == TK_SPACE) {
+            token_stream_next(ctx->tokens);
+            return 1;
+        }
     }
     return 0;
 }
