@@ -2,7 +2,7 @@
 #include <setjmp.h>
 
 #define RUN(...) \
-    test_run_collection(__func__, __VA_ARGS__, NULL)
+    test_print_result(__func__, test_run_collection(__func__, __VA_ARGS__, NULL))
 
 #define SUITE(name) \
     void name(void)
@@ -24,3 +24,8 @@ typedef void (*test_f)(struct context);
  * Runs a collection of tests and returns the number of failed tests
  */
 int test_run_collection(const char *name, ...);
+
+/**
+ * Prints the result to stdout
+ */
+void test_print_result(const char *name, size_t fail_cnt);
