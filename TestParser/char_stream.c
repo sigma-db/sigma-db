@@ -14,15 +14,15 @@ TEST(peek)
 {
     sigma_char_t cp;
 
-    cp = char_stream_peek(cs, 5);
-    EXPECT(cp == 'd');
+    cp = char_stream_peek(cs, 4);
+    EXPECT(cp == 'i');
 
     char_stream_advance(cs, 7);
     cp = char_stream_next(cs);
     EXPECT(cp == 'u');
 
-    cp = char_stream_peek(cs, 5);
-    EXPECT(cp == 'i');
+    cp = char_stream_peek(cs, 2);
+    EXPECT(cp == 's');
 }
 
 TEST(iterate)
@@ -37,7 +37,7 @@ TEST(iterate)
     EXPECT(!char_stream_has_more(cs));
 }
 
-SUITE(CharStreamTest)
+SUITE(test_char_stream)
 {
     // TODO: Add tests for UTF-8 strings with multi-byte characters
     RUN(init, peek, iterate);

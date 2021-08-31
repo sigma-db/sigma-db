@@ -17,7 +17,7 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Database", "Database\Databa
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Common", "Common\Common.vcxproj", "{C4EB5349-9624-4A88-8C82-5DD0B11313AC}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "TestCommon", "TestCommon\TestCommon.vcxproj", "{02C35771-D9E6-4D71-941A-B09CE629B131}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "TestParser", "TestParser\TestParser.vcxproj", "{02C35771-D9E6-4D71-941A-B09CE629B131}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Test", "Test\Test.vcxproj", "{56E60556-4F75-4C31-9499-C78E0ADCE0EB}"
 EndProject
