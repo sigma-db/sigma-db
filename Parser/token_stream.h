@@ -12,6 +12,7 @@
 enum token_type {
     TK_ERROR,
     TK_LITERAL_INTEGER,
+    TK_SPACE,
     TK_END
 };
 

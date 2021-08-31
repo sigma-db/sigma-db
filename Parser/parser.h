@@ -1,13 +1,21 @@
-#pragma once
+#ifndef PARSER_H
+#define PARSER_H
 
 #include <stdlib.h>
+#include <stdbool.h>
 
-typedef struct parser_context *parser_context_t;
+#include "statement.h"
 
-typedef struct statement *statement_t;
+struct parser_context;
 
-int parser_create(parser_context_t *ctx, const char *qstr, size_t qstr_len);
+int parser_create(struct parser_context **ctx, const char *qstr, size_t qstr_len);
 
-void parser_destroy(parser_context_t ctx);
+void parser_destroy(struct parser_context *ctx);
 
-statement_t parser_next(parser_context_t ctx);
+struct statement *parser_next(struct parser_context *ctx);
+
+bool parser_has_more(struct parser_context *ctx);
+
+// TODO: Create header public/parser.h and code file main.c to implement public (convenience) interface
+
+#endif // !PARSER_H

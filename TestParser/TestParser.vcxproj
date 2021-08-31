@@ -83,8 +83,8 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ProjectReference Include="..\Common\Common.vcxproj">
-      <Project>{c4eb5349-9624-4a88-8c82-5dd0b11313ac}</Project>
+    <ProjectReference Include="..\Parser\Parser.vcxproj">
+      <Project>{34b2a758-3e8b-4163-a757-130b3e55037d}</Project>
     </ProjectReference>
     <ProjectReference Include="..\Test\Test.vcxproj">
       <Project>{56e60556-4f75-4c31-9499-c78e0adce0eb}</Project>

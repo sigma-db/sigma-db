@@ -1,4 +1,4 @@
-#include "instance.h";
+#include "instance.h"
 
 void load()
 {

@@ -8,7 +8,7 @@ const char *statement_tostring(struct statement *stmt)
 
     case INSERT:
         struct insert_statement insert_stmt = stmt->as_insert;
-        size_t str_len = insert_stmt.rel_name_len + 3;
+        //size_t str_len = insert_stmt.rel_name_len + 3;
         //const char *str = malloc();
         break;
 
@@ -21,4 +21,6 @@ const char *statement_tostring(struct statement *stmt)
     case DUMP:
         break;
     }
+
+    return "<statement>";
 }
