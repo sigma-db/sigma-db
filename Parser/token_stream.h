@@ -28,7 +28,7 @@ void token_stream_destroy(struct token_stream *ts);
 
 struct token token_stream_next(struct token_stream *ts);
 
-struct token token_stream_peek(struct token_stream *ts);
+struct token token_stream_peek(struct token_stream *ts, size_t k);
 
 bool token_stream_has_more(struct token_stream *ts);
 

@@ -4,44 +4,40 @@
 
 #include "test.h"
 
-static _Noreturn void failure_cb(struct context ctx, const char *msg, size_t lineno)
+static _Noreturn void failure_cb(struct context ctx, const char *name, size_t lineno, const char *msg)
 {
-    fprintf(stderr, "Test \"%s\" on line %zu failed: %s.\n", ctx.name, lineno, msg);
+    fprintf(stderr, "Test \"%s\" on line %zu failed: %s.\n", name, lineno, msg);
     longjmp(*ctx.buf, 1);
 }
 
-int test_run_collection(const char *coll_name, char test_names[], test_f tests[])
+int test_run_collection(const char *name, ...)
 {
     jmp_buf error;
+    struct context ctx = {
+        .fail = failure_cb,
+        .buf = &error,
+    };
 
-    size_t test_cnt = 0;
+    va_list ap;
+    va_start(ap, name);
+
     size_t fail_cnt = 0;
-
-    /* Iterate the test names provided as a comma-separated list `test_names`
-     * and the respective function pointers provided as varargs
-     */
-    char *ctx = NULL;
-    char *name = strtok_s(test_names, ", ", &ctx);
-    while (name != NULL) {
+    test_f test = va_arg(ap, test_f);
+    while (test != NULL) {
         if (!setjmp(error)) {
-            struct context ctx = { 
-                .name = name,
-                .fail = failure_cb,
-                .buf = &error,
-            };
-            tests[test_cnt++](ctx);
+            test(ctx);
         } else {
             fail_cnt += 1;
         }
-        name = strtok_s(NULL, ", ", &ctx);
+        test = va_arg(ap, test_f);
     }
 
     printf("\n");
     if (fail_cnt == 0) {
-        printf("All tests in collection \"%s\" succeeded.\n", coll_name);
+        printf("All tests in collection \"%s\" succeeded.\n", name);
     } else {
         const char *num = fail_cnt == 1 ? "test" : "tests";
-        printf("%zu %s in collection \"%s\" failed.\n", fail_cnt, num, coll_name);
+        printf("%zu %s in collection \"%s\" failed.\n", fail_cnt, num, name);
     }
 
     return fail_cnt;
