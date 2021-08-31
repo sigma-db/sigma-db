@@ -57,8 +57,11 @@ A test can be part of multiple suits and consequently a file can contain multipl
 Personally, I prefer to "import" all suits from all files in `main.c` and execute them inside the `main` function.
 This way, `main.c` serves as a kind of table of contents and also the number of files is kept low.
 
-## Platforms
+## Supported Platforms
 
-I developed and tested the code on Windows 10 using both, Microsoft Visual C++ 2019 with C17 support turned on, and Clang 12.
-In the future, I plan to add Linux support.
-At the moment, I guess that due to Microsoft's implementation of `strtok_s` differing from the one on Linux, there will be compiler errors.
+I tested the following platforms:
+
+* Windows 10 with MSVC 2019 with C17 support turned on, and Clang 12
+* Fedora 34 with Clang 12
+
+Other platforms may work as well, although I did not test them.
