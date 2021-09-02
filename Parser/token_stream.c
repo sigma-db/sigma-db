@@ -6,7 +6,7 @@
 
 #define simple_token(tok_type) (struct token){ .type = tok_type }
 #define value_token(tok_type, tok_length, ...) (struct token){ .type = tok_type, .length = tok_length, .value = { __VA_ARGS__ } }
-#define reference_token(tok_type, tok_length, tok_reference) (struct token){ .type = tok_type, .length = tok_length, .reference = tok_reference }
+#define str2tok(tok_type, str) (struct token){ .type = tok_type, .length = str.length, .reference = str.chars }
 
 struct token_stream {
     struct char_stream *chars;
@@ -18,30 +18,20 @@ typedef struct {
     sigma_char_t *chars;
 } string;
 
-static inline const string string_create(size_t capacity)
-{
-    sigma_char_t *chars = malloc(sizeof(sigma_char_t) * capacity);
-    string str = {
-        .capacity = capacity,
-        .length = 0,
-        .chars = chars,
-    };
-    return str;
-}
+#define str_create(sz) { .capacity = sz, .length = 0, .chars = malloc(sizeof(sigma_char_t) * sz) }
 
-static int string_append_char(string *str, sigma_char_t c)
+static void str_append(string *str, sigma_char_t c)
 {
     if (str->length == str->capacity) {
         // We double the capacity when running out of space
         sigma_char_t chars_new = realloc(str->chars, str->capacity * 2);
         if (chars_new == NULL) {
-            return -1;
+            return;
         }
         str->capacity *= 2;
         str->chars = chars_new;
     }
     str->chars[str->length++] = c;
-    return 0;
 }
 
 const struct token error_token = { .type = TK_ERROR };
@@ -73,12 +63,12 @@ struct token token_stream_next(struct token_stream *ts)
     char32_t c = char_stream_next(ts->chars);
     switch (character_class(c)) {
     case CC_DIGIT:
-        const string num_str = string_create(MAX_TOKEN_LENGTH);
-        string_append_char(&num_str, c);
+        string digit_str = str_create(MAX_TOKEN_LENGTH);
+        str_append(&digit_str, c);
         while (char_stream_has_more(ts->chars) && isdigit(char_stream_peek(ts->chars, 1))) {
-            string_append_char(&num_str, char_stream_next(ts->chars));
+            str_append(&digit_str, char_stream_next(ts->chars));
         }
-        return reference_token(TK_LITERAL_INT, num_str.length, num_str.chars);
+        return str2tok(TK_LITERAL_INT, digit_str);
 
     case CC_ALPHA:
         break;
@@ -91,11 +81,11 @@ struct token token_stream_next(struct token_stream *ts)
 
     case CC_QUOTE:
         if (c == '"') {
-            const string str = string_create(MAX_TOKEN_LENGTH);
+            string str = str_create(MAX_TOKEN_LENGTH);
             while ((c = char_stream_next(ts->chars)) != '"') {
-                string_append_char(&str, c);
+                str_append(&str, c);
             }
-            return reference_token(TK_LITERAL_STRING, str.length, str.chars);
+            return str2tok(TK_LITERAL_STRING, str);
         }
         if (c == '\'') {
             if (char_stream_peek(ts->chars, 2) == '\'') {
@@ -116,11 +106,7 @@ exit_error:
 
 struct token token_stream_peek(struct token_stream *ts, size_t k)
 {
-    const size_t before = char_stream_pos(ts->chars);
-    const struct token result = token_stream_next(ts);
-    const int offset = (int)(char_stream_pos(ts->chars) - before);
-    char_stream_advance(ts->chars, -offset);
-    return result;
+    return error_token;
 }
 
 bool token_stream_has_more(struct token_stream *ts)
