@@ -1,5 +1,4 @@
 #include <stdlib.h>
-#include <stddef.h>
 #include <setjmp.h>
 
 #define RUN(...) \
@@ -23,7 +22,7 @@
     if (!(cond)) FAIL(#cond)
 
 struct context {
-    void (*fail)(struct context, size_t, const char *);
+    void (*fail)(struct context, int, const char *);
     jmp_buf *buf;
 };
 
@@ -42,4 +41,4 @@ int test__run_collection(const char *name, ...);
 /**
  * Prints the result to stdout
  */
-void test__print_result(const char *name, size_t fail_cnt);
+void test__print_result(const char *name, int fail_cnt);

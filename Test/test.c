@@ -1,6 +1,4 @@
-#include <stdio.h>
 #include <stdarg.h>
-#include <string.h>
 
 #include "test.h"
 
@@ -16,9 +14,9 @@
 
 typedef int (*test_run_f)(struct context);
 
-static _Noreturn void failure_handler(struct context ctx, size_t lineno, const char *msg)
+static _Noreturn void failure_handler(struct context ctx, int lineno, const char *msg)
 {
-    error("\n    Expectation on line %zu failed: %s.\n", lineno, msg);
+    error("\n    Expectation on line %d failed: %s.\n", lineno, msg);
     longjmp(*ctx.buf, 1);
 }
 
@@ -43,7 +41,7 @@ int test__run_collection(const char *name, ...)
     test_run_f test;
     jmp_buf error;
 
-    size_t fail_cnt = 0;
+    int fail_cnt = 0;
     struct context ctx = {
         .fail = failure_handler,
         .buf = &error,
@@ -58,13 +56,13 @@ int test__run_collection(const char *name, ...)
     return fail_cnt;
 }
 
-void test__print_result(const char *name, size_t fail_cnt)
+void test__print_result(const char *name, int fail_cnt)
 {
     printf("\n");
     if (fail_cnt == 0) {
         success("All tests in collection \"%s\" succeeded.\n", name);
     } else {
         const char *test_num = fail_cnt == 1 ? "test" : "tests";
-        error("%zu %s in collection \"%s\" failed.\n", fail_cnt, test_num, name);
+        error("%d %s in collection \"%s\" failed.\n", fail_cnt, test_num, name);
     }
 }
