@@ -1,3 +1,5 @@
+#include <stdlib.h>
+
 #include "test.h"
 
 SUITE(test_char_stream);

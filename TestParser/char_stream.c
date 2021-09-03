@@ -15,7 +15,7 @@ TEST(peek)
     sigma_char_t cp;
 
     cp = char_stream_peek(cs, 4);
-    EXPECT(cp == 'i');
+    EXPECT(cp == 'x'); // i
 
     char_stream_advance(cs, 7);
     cp = char_stream_next(cs);
