@@ -9,12 +9,22 @@
       <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
       <Extensions>h;hh;hpp;hxx;h++;hm;inl;inc;ipp;xsd</Extensions>
     </Filter>
-    <Filter Include="Resources">
+    <Filter Include="Documentation">
       <UniqueIdentifier>{10f0f559-e25d-44a8-9b41-456684a91aba}</UniqueIdentifier>
+      <Extensions>md</Extensions>
     </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="test.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="style.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="symbols.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="logging.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
@@ -25,7 +35,7 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="README.md">
-      <Filter>Resources</Filter>
+      <Filter>Documentation</Filter>
     </None>
   </ItemGroup>
 </Project>

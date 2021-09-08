@@ -7,56 +7,9 @@
 #include <locale.h>
 
 #include "test.h"
+#include "logging.h"
 
 #include <stdnoreturn.h>
-
-// Attributes
-#define BRIGHT 1
-#define DIM 2
-#define NORMAL 22
-
-// Colors
-#define BLACK 31
-#define RED 31
-#define GREEN 32
-#define YELLOW 33
-#define BLUE 34
-#define MAGENTA 35
-#define CYAN 36
-#define WHITE 37
-#define DEFAULT 39
-
-// Unicode Characters
-#define DOTTED_CIRCLE 0x25CC
-#define BLACK_CIRCLE 0x25CF
-#define CHECKMARK 0x2713
-#define CROSSMARK 0x2717
-#define PROMPT 0x276F
-
-#define stringize(expr) #expr
-#define escape(code) "\x1b[" stringize(code) "m"
-
-#define bright(string) escape(BRIGHT) string escape(NORMAL)
-#define dim(string) escape(DIM) string escape(NORMAL)
-#define colour(code, string) escape(code) string escape(DEFAULT)
-
-#define black(string) colour(BLACK, string)
-#define red(string) colour(RED, string)
-#define green(string) colour(GREEN, string)
-#define yellow(string) colour(YELLOW, string)
-#define blue(string) colour(BLUE, string)
-#define magenta(string) colour(MAGENTA, string)
-#define cyan(string) colour(CYAN, string)
-#define white(string) colour(WHITE, string)
-
-#define log(fmt, ...) fprintf(stdout, fmt, __VA_ARGS__)
-#define bullet(ch, col) log()
-#define item(level, bullet, fmt, ...) log("%*s%lc " fmt, level * 4, "", bullet, __VA_ARGS__)
-
-#define error(format, ...) log(red(format), __VA_ARGS__)
-#define success(format, ...) log(green(format), __VA_ARGS__)
-#define warn(format, ...) log(yellow(format), __VA_ARGS__)
-#define info(format, ...) log(white(format), __VA_ARGS__)
 
 typedef int (*test_run_f)(struct context);
 
@@ -70,12 +23,12 @@ static int enable_vt_mode()
 
     DWORD dwMode = 0;
     if (!GetConsoleMode(hOut, &dwMode)) {
-        return -1;
+        return -2;
     }
 
     dwMode |= ENABLE_VIRTUAL_TERMINAL_PROCESSING;
     if (!SetConsoleMode(hOut, dwMode)) {
-        return -1;
+        return -3;
     }
 
     return 0;
@@ -90,7 +43,7 @@ static noreturn void failure_handler(struct context ctx, int lineno, const char 
 
 static void warning_handler(struct context ctx, int lineno, const char *msg)
 {
-    item(2, BLACK_CIRCLE, yellow("Expectation on line %d failed: %s\n"), lineno, msg);
+    write(join(item(2, BLACK_CIRCLE, YELLOW), format("Expectation on line %d failed: %s\n", lineno, msg)));
 }
 
 int test_run(const char *name, test_f test, struct context ctx)
@@ -100,7 +53,7 @@ int test_run(const char *name, test_f test, struct context ctx)
     if (fail) {
         error("\r    %lc %s\n", CROSSMARK, name);
     } else {
-        info("\r    " green("%lc") " %s\n", CHECKMARK, name);
+        write_test_success("%s\n", name);
     }
     return fail;
 }
@@ -137,7 +90,7 @@ int test_run_collection(const char *name, ...)
 
     fprintf(stdout, "\n");
     if (fail_cnt < test_cnt) {
-        suite_success("%d passing\n", test_cnt - fail_cnt);
+        success("%d passing\n", test_cnt - fail_cnt);
     }
     if (fail_cnt > 0) {
         error("%lc %d failing\n", CROSSMARK, fail_cnt);

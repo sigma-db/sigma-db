@@ -28,7 +28,6 @@
     if (!(cond)) WARN(#cond)
 
 struct context {
-    void (*fail)(struct context, int, const char *);
     void (*warn)(struct context, int, const char *);
     jmp_buf *buf;
 };
