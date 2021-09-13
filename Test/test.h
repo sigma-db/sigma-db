@@ -1,33 +1,30 @@
-#include <stddef.h>
 #include <setjmp.h>
+#include <stddef.h>
 
-#define RUN(...) \
-    test_run_collection(__func__, __VA_ARGS__, NULL)
+#define RUN(...) test_run_collection(__func__, __VA_ARGS__, NULL)
 
-#define SUITE(name) \
-    void name(void)
+#define SUITE(name) void name(void)
 
-#define TEST(name) \
-    static void test_ ## name(struct context ctx); \
-    static int name(struct context ctx) \
-    { \
-        return test_run(#name, test_ ## name, ctx); \
-    } \
-    static void test_ ## name(struct context ctx)
+#define TEST(name)                                                                                 \
+    static void test_##name(struct context ctx);                                                   \
+    static int  name(struct context ctx)                                                           \
+    {                                                                                              \
+        return test_run(#name, test_##name, ctx);                                                  \
+    }                                                                                              \
+    static void test_##name(struct context ctx)
 
-#define FAIL(msg) \
-    ctx.fail(ctx, __LINE__, msg)
+#define FAIL(msg) ctx.fail(ctx, __LINE__, msg)
 
-#define WARN(msg) \
-    ctx.warn(ctx, __LINE__, msg)
+#define WARN(msg) ctx.warn(ctx, __LINE__, msg)
 
-#define ASSERT(cond) \
+#define ASSERT(cond)                                                                               \
     if (!(cond)) FAIL(#cond)
 
-#define EXPECT(cond) \
+#define EXPECT(cond)                                                                               \
     if (!(cond)) WARN(#cond)
 
 struct context {
+    void (*fail)(struct context, int, const char *);
     void (*warn)(struct context, int, const char *);
     jmp_buf *buf;
 };

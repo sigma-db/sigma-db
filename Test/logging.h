@@ -7,8 +7,10 @@
 // Formatting Constants
 #define INDENT 4
 
+/* clang-format off */
 #define va_cnt_(_1, _2, _3, _4, _5, _6, _7, _8, N, ...) N
 #define va_cnt(...) va_cnt_(__VA_ARGS__, 8, 7, 6, 5, 4, 3, 2, 1)
+/* clang-format on */
 
 #define mangle__(name, arity) name##arity
 #define mangle_(name, arity)  mangle__(name, arity)
@@ -32,21 +34,16 @@
 #define write(...) fprintf(stdout, unpack(join(__VA_ARGS__)))
 
 // Predefined Templates
-#define raw(...)                 (simple, __VA_ARGS__)
 #define format(fmt, ...)         (fmt, __VA_ARGS__)
 #define bullet(chcode, chcolour) (colour(chcolour, "%lc "), chcode)
 #define indent(depth)            ("%*s", depth * INDENT, "")
 
-// Predefined Templates
-#define format(fmt, ...) (fmt, __VA_ARGS__)
-#define bullet(chcode, chcolour) (colour(chcolour, "%lc "), chcode)
-#define indent(depth) ("%*s", depth * INDENT, "")
+// Predefined Constant Templates
+#define CR format("%c", '\r')
 
-#define test_success(name) join(indent(1), bullet(CHECKMARK, GREEN), format("%s", name))
-
-#define error(fmt, ...) write(red(fmt), __VA_ARGS__)
-#define success(fmt, ...) write(green(fmt), __VA_ARGS__)
-#define warn(fmt, ...) write(yellow(fmt), __VA_ARGS__)
-#define info(fmt, ...) write(white(fmt), __VA_ARGS__)
+#define error(fmt, ...)   (red(fmt), __VA_ARGS__)
+#define success(fmt, ...) (green(fmt), __VA_ARGS__)
+#define warn(fmt, ...)    (yellow(fmt), __VA_ARGS__)
+#define info(fmt, ...)    (white(fmt), __VA_ARGS__)
 
 #endif // !LOGGING_H

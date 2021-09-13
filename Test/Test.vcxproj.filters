@@ -37,5 +37,6 @@
     <None Include="README.md">
       <Filter>Documentation</Filter>
     </None>
+    <None Include=".clang-format" />
   </ItemGroup>
 </Project>

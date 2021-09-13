@@ -20,6 +20,7 @@
     <ClCompile Include="test.c" />
   </ItemGroup>
   <ItemGroup>
+    <None Include=".clang-format" />
     <None Include="README.md" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
