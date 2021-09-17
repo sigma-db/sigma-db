@@ -95,11 +95,11 @@ int sigma_test_main(int argc, char *argv)
 
 int sigma_test_run_test(union event_args *e, const char *name, test_f test)
 {
-    union event_args test_ctx = test_event(&e->suite, name, 0);
-    report(TEST_BEGIN, &test_ctx);
-    int fail = !setjmp(e->suite.buf) ? test(e, on_fail, on_warn), 0 : e->test.fail_cnt;
-    report(TEST_END, &test_ctx);
-    return fail;
+    union event_args args = test_event(&e->suite, name, 0);
+    report(TEST_BEGIN, &args);
+    int fail_cnt = !setjmp(e->suite.buf) ? test(&args, on_fail, on_warn), 0 : args.test.fail_cnt;
+    report(TEST_END, &args);
+    return fail_cnt;
 }
 
 int sigma_test_run_test_collection(const char *file_name, const char *suite_name, ...)
@@ -132,12 +132,14 @@ int sigma_test_run_test_collection(const char *file_name, const char *suite_name
 
 static noreturn void on_fail(union event_args *e, int lineno, const char *msg)
 {
+    e->test.fail_cnt += 1;
     report(ASSERTION_FAILURE, &assertion_event(&e->test, lineno, msg));
     longjmp(e->test.suite->buf, 1);
 }
 
 static void on_warn(union event_args *e, int lineno, const char *msg)
 {
+    e->test.fail_cnt += 1;
     report(ASSERTION_FAILURE, &assertion_event(&e->test, lineno, msg));
 }
 
@@ -173,8 +175,8 @@ static void console_reporter(enum event_type type, union event_args *e)
 
     case ASSERTION_FAILURE:
         // Before printing the very first error message, we visually mark the test as failing
-        if (e->test.fail_cnt == 1) {
-            write(CR, indent(1), bullet(CROSSMARK, RED), error("%s\n", e->test.name));
+        if (e->assertion.test->fail_cnt == 1) {
+            write(CR, indent(1), bullet(CROSSMARK, RED), error("%s\n", e->assertion.test->name));
         }
         write(
             indent(2),
