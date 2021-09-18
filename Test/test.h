@@ -31,7 +31,7 @@ typedef void (*test_f)(union event_args *, event_handler_f, event_handler_f);
 /**
  * Process forwarded command line arguments to configure the test engine
  */
-int sigma_test_main(int argc, char *argv);
+int sigma_test_main(int argc, char *argv[]);
 
 /**
  * Runs a test and returns 0 on success

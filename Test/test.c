@@ -78,26 +78,28 @@ union event_args {
 static int enable_vt_mode();
 #endif // _WIN32
 
-static void          console_reporter(enum event_type, union event_args *);
+static void          console_reporter(enum event_type type, union event_args *e);
 static noreturn void on_fail(union event_args *e, int lineno, const char *msg);
 static void          on_warn(union event_args *e, int lineno, const char *msg);
 
-static report_f      report = console_reporter;
+static report_f report = console_reporter;
 
-int sigma_test_main(int argc, char *argv)
+int sigma_test_main(int argc, char *argv[])
 {
 #ifdef _WIN32
     enable_vt_mode();
     SetConsoleOutputCP(CP_UTF8);
 #endif
     setlocale(LC_ALL, "en_US.UTF-8");
+
+    return EXIT_SUCCESS;
 }
 
 int sigma_test_run_test(union event_args *e, const char *name, test_f test)
 {
     union event_args args = test_event(&e->suite, name, 0);
     report(TEST_BEGIN, &args);
-    int fail_cnt = !setjmp(e->suite.buf) ? test(&args, on_fail, on_warn), 0 : args.test.fail_cnt;
+    int fail_cnt = !setjmp(*e->suite.buf) ? test(&args, on_fail, on_warn), 0 : args.test.fail_cnt;
     report(TEST_END, &args);
     return fail_cnt;
 }
@@ -134,7 +136,7 @@ static noreturn void on_fail(union event_args *e, int lineno, const char *msg)
 {
     e->test.fail_cnt += 1;
     report(ASSERTION_FAILURE, &assertion_event(&e->test, lineno, msg));
-    longjmp(e->test.suite->buf, 1);
+    longjmp(*e->test.suite->buf, 1);
 }
 
 static void on_warn(union event_args *e, int lineno, const char *msg)
