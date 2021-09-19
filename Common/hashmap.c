@@ -7,19 +7,21 @@
 #define GROWTH_FACTOR 2
 
 struct slot {
-    bool   taken;
-    size_t hash;
-    void * val;
+    bool        taken;
+    size_t      hash;
+    const void *key;
+    const void *val;
 };
 
 struct hashmap {
     comparator_f cmp;
-    size_t       items_count;
     size_t       capacity;
+    size_t       items_count;
     struct slot *items;
+    char *       strings;
 };
 
-static struct slot *find_slot(struct hashmap *map, size_t hash);
+static struct slot *find_slot(struct hashmap *map, size_t hash, const void *key);
 static void         expand(struct hashmap *map);
 static uint64_t     hash_fnv(const void *key, size_t key_sz);
 
@@ -36,7 +38,9 @@ int hashmap_create(struct hashmap **map, size_t capacity, comparator_f cmp)
         .cmp         = cmp,
         .items_count = 0,
         .capacity    = capacity,
-        .items       = calloc(capacity, sizeof(struct slot))};
+        .items       = calloc(capacity, sizeof(struct slot)),
+        .strings     = malloc(capacity * 16),
+    };
     /* clang-format on */
 
     return 0;
@@ -55,45 +59,60 @@ void hashmap_set(struct hashmap *map, const void *key, const void *val)
     }
 
     size_t       hash = hash_fnv(key, 0);
-    struct slot *slot = find_slot(map, hash);
+    struct slot *slot = find_slot(map, hash, key);
 
     if (!slot->taken) {
+        slot->taken = true;
         map->items_count++; // do only when slot was empty
     }
 
-    slot->taken = true;
-    slot->hash  = hash;
-    slot->val   = val;
+    slot->hash = hash;
+    slot->key  = key;
+    slot->val  = val;
 }
 
-void *hashmap_get(struct hashmap *map, const void *key)
+const void *hashmap_get(struct hashmap *map, const void *key)
 {
     size_t       hash = hash_fnv(key, 0);
-    struct slot *slot = find_slot(map, hash);
+    struct slot *slot = find_slot(map, hash, key);
 
     return slot != NULL && slot->taken ? slot->val : NULL;
 }
 
-int hashmap_has(struct hashmap *map, void *key)
+const void* hashmap_get_or_default(hashmap* map, const void* key, const void* default_val) {
+    const void *val = hashmap_get(map, key);
+    return val != NULL ? val : default_val;
+}
+
+int hashmap_has(struct hashmap *map, const void *key)
 {
     return hashmap_get(map, key) != NULL;
 }
 
-static struct slot *find_slot(struct hashmap *map, size_t hash)
+static int
+equal(struct hashmap *map, uint64_t hash1, const void *key1, uint64_t hash2, const void *key2)
+{
+    return hash1 == hash2 && key1 != NULL && key2 != NULL && map->cmp(key1, key2) == 0;
+}
+
+static struct slot *find_slot(struct hashmap *map, size_t hash, const void *key)
 {
     size_t       pos  = hash % map->capacity;
     size_t       j    = 0;
     struct slot *slot = map->items + pos;
 
     for (size_t i = 0; i < map->capacity; i++) {
-        if (slot->hash == hash || !slot->taken) {
-            return slot;
-        } else {
-            j += j + 1; // quadratic probing: this is the same as probe(j)=j+j^2
+        /*
+         * Since entries can *not* be deleted, it is safe to assume that when while probing an empty
+         * spot is found, the provided key is not currently in the hashmap.
+         */
 
-            size_t p = (pos + j) % map->capacity;
-            slot     = map->items + p;
+        if (equal(map, slot->hash, slot->key, hash, key) || !slot->taken) {
+            return slot;
         }
+        j += j + 1; // quadratic probing: same as probe(j) = j + j^2
+        size_t p = (pos + j) % map->capacity;
+        slot     = map->items + p;
     }
 
     return NULL;
@@ -108,8 +127,8 @@ static void expand(struct hashmap *map)
     map->items = calloc(map->capacity, sizeof(struct slot));
 
     for (size_t i = 0; i < capacity_old; i++) {
-        struct slot slot           = items_old[i];
-        *find_slot(map, slot.hash) = slot;
+        struct slot slot                     = items_old[i];
+        *find_slot(map, slot.hash, slot.key) = slot;
     }
 
     free(items_old);
@@ -122,7 +141,7 @@ static uint64_t hash_fnv(const void *key, size_t key_sz)
      */
 
     uint64_t hash = 0xCBF29CE484222325;
-    for (uint8_t *c = key; *c != 0 && key_sz > 0; c++) {
+    for (const uint8_t *c = key; *c != 0 && key_sz > 0; c++) {
         hash = (hash ^ *c) * 0x100000001B3;
     }
     return hash;

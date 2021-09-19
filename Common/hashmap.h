@@ -14,7 +14,9 @@ void hashmap_destroy(hashmap *map);
 
 void hashmap_set(hashmap *map, const void *key, const void *val);
 
-void *hashmap_get(hashmap *map, const void *key);
+const void *hashmap_get(hashmap *map, const void *key);
+
+const void *hashmap_get_or_default(hashmap *map, const void *key, const void *default_val);
 
 int hashmap_has(hashmap *map, const void *key);
 

@@ -24,6 +24,12 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Test", "Test\Test.vcxproj",
 		{C4EB5349-9624-4A88-8C82-5DD0B11313AC} = {C4EB5349-9624-4A88-8C82-5DD0B11313AC}
 	EndProjectSection
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{DDE1BF59-4CB1-41F3-AF4C-827054B6E274}"
+	ProjectSection(SolutionItems) = preProject
+		.clang-format = .clang-format
+		README.md = README.md
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x64 = Debug|x64
