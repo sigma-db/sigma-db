@@ -11,7 +11,12 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="linked_list.c" />
+    <ClCompile Include="args.c" />
+    <ClCompile Include="hashmap.c" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="args.h" />
+    <ClInclude Include="hashmap.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>16.0</VCProjectVersion>

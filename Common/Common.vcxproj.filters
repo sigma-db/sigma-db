@@ -11,8 +11,19 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="linked_list.c">
+    <ClCompile Include="hashmap.c">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="args.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="hashmap.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="args.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

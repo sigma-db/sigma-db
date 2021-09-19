@@ -6,6 +6,9 @@
 #include <setjmp.h>
 #include <stdarg.h>
 #include <stdio.h>
+#include <string.h>
+
+#include "../Common/args.h"
 
 #include "logging.h"
 #include "test.h"
@@ -79,12 +82,18 @@ static report_f report = console_reporter;
 
 int sigma_test_main(int argc, char *argv[])
 {
+    hashmap *args = parse_args(argc, argv);
+    if (hashmap_has(args, "reporter")) {
+        const char *id = hashmap_get(args, "reporter");
+        if (strcmp(id, "spec") == 0) {
+            report = console_reporter;
 #ifdef _WIN32
-    enable_vt_mode();
-    SetConsoleOutputCP(CP_UTF8);
+            enable_vt_mode();
+            SetConsoleOutputCP(CP_UTF8);
 #endif
-    setlocale(LC_ALL, "en_US.UTF-8");
-
+            setlocale(LC_ALL, "en_US.UTF-8");
+        }
+    }
     return EXIT_SUCCESS;
 }
 

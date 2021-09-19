@@ -1,2 +1,2 @@
-#!/bin/bash
-clang-format --style=file -i $(git diff --staged --name-only "*.h" "*.c")
+#!/bin/sh
+clang-format --style=file -i $(git diff --staged --name-only --diff-filter=d "*.h" "*.c")
