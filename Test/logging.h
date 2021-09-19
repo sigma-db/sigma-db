@@ -1,6 +1,9 @@
 #ifndef LOGGING_H
 #define LOGGING_H
 
+#include <stdio.h>
+#include <string.h>
+
 #include "style.h"
 #include "symbols.h"
 
@@ -30,8 +33,9 @@
 #define join7(a, ...) join2(a, join6(__VA_ARGS__))
 #define join8(a, ...) join2(a, join7(__VA_ARGS__))
 
-#define join(...)  mangle(join, __VA_ARGS__)(__VA_ARGS__)
-#define write(...) fprintf(stdout, unpack(join(__VA_ARGS__)))
+#define join(...)        mangle(join, __VA_ARGS__)(__VA_ARGS__)
+#define write(...)       fprintf(stdout, unpack(join(__VA_ARGS__)))
+#define string(dst, ...) sprintf(dst, unpack(join(__VA_ARGS__)))
 
 // Predefined Templates
 #define format(fmt, ...)         (fmt, __VA_ARGS__)

@@ -33,13 +33,6 @@
 typedef int (*test_run_f)(union event_args *);
 typedef void (*report_f)(enum event_type, union event_args *);
 
-struct location {
-    const char *file_name;
-    const char *suite_name;
-    const char *test_name;
-    int         lineno;
-};
-
 enum event_type {
     SUITE_BEGIN,
     SUITE_END,
@@ -117,17 +110,18 @@ int sigma_test_run_test_collection(const char *file_name, const char *suite_name
         .fail_cnt  = 0,
         .buf       = &error,
     };
+    union event_args args = suite_event(suite);
 
-    report(SUITE_BEGIN, &suite_event(suite));
+    report(SUITE_BEGIN, &args);
 
     va_start(ap, suite_name);
     while ((test = va_arg(ap, test_run_f)) != NULL) {
         suite.test_cnt += 1;
-        suite.fail_cnt += test(&suite_event(suite));
+        suite.fail_cnt += test(&args) > 0;
     }
     va_end(ap);
 
-    report(SUITE_END, &suite_event(suite));
+    report(SUITE_END, &args);
 
     return suite.fail_cnt;
 }
@@ -182,7 +176,7 @@ static void console_reporter(enum event_type type, union event_args *e)
         }
         write(
             indent(2),
-            bullet(BLACK_CIRCLE, YELLOW),
+            bullet(BULLET, YELLOW),
             warn("Expectation on line %d failed: %s\n", e->assertion.lineno, e->assertion.message));
         break;
     }
