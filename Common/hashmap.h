@@ -8,7 +8,7 @@ typedef struct hashmap hashmap;
 
 typedef int (*comparator_f)(const void *, const void *);
 
-int hashmap_create(hashmap **map, size_t capacity, comparator_f cmp);
+int hashmap_create(hashmap **map, size_t capacity_exp, comparator_f cmp);
 
 void hashmap_destroy(hashmap *map);
 

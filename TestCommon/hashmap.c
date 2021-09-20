@@ -1,28 +1,70 @@
+#include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 
-#include "test.h"
 #include "hashmap.h"
+#include "test.h"
 
-static hashmap *map;
-
-TEST(init)
+TEST(create)
 {
-    int error = hashmap_create(&map, 7, strcmp);
+    hashmap *map;
+    int      error = hashmap_create(&map, 7, strcmp);
     EXPECT(!error && map != NULL);
+
+    hashmap_destroy(map);
 }
 
 TEST(set)
 {
     const char *key = "first_name";
+    const char *value;
+
+    hashmap *map;
+    hashmap_create(&map, 7, strcmp);
 
     hashmap_set(map, key, "David");
-    EXPECT(hashmap_has(map, key));
-
-    const char *value = hashmap_get(map, key);
+    value = hashmap_get(map, key);
     EXPECT(strcmp(value, "David") == 0);
+
+    hashmap_set(map, key, "Luis");
+    value = hashmap_get(map, key);
+    EXPECT(strcmp(value, "Luis") == 0);
+
+    hashmap_destroy(map);
+}
+
+TEST(expand)
+{
+    hashmap *map;
+    hashmap_create(&map, 2, strcmp); // Allocates space for (2 + 1) * 2 = 6 slots
+
+    /* Expansion is assumed to occur if prior to an insertion, >50% of available slots are occupied
+     * In our case, this must be after the 4th insertion, i.e. upon the 5th one.
+     */
+
+    const char   keys[5][3];
+    const size_t cnt = sizeof(keys) / sizeof(keys[0]);
+
+    // Generate keys
+    for (int i = 0; i < cnt; i++) {
+        snprintf(keys[i], 3, "k%d", i + 1);
+    }
+
+    // Use keys to set hashmap entries
+    for (int i = 0; i < cnt; i++) {
+        hashmap_set(map, keys[i], "value");
+    }
+
+    // If all previously inserted keys exist, the expansion was successful
+    for (int i = 0; i < cnt; i++) {
+        EXPECT(hashmap_has(map, keys[i]));
+        const char *value = hashmap_get(map, keys[i]);
+    }
+
+    hashmap_destroy(map);
 }
 
 SUITE(test_hashmap)
 {
-    RUN(init, set);
+    RUN(create, set, expand);
 }
