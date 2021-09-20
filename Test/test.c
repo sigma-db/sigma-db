@@ -15,6 +15,8 @@
 
 #include <stdnoreturn.h>
 
+#define streq(str1, str2) (strcmp(str1, str2) == 0)
+
 #define suite_event(suite)                                                                         \
     (union event_args)                                                                             \
     {                                                                                              \
@@ -86,7 +88,7 @@ int sigma_test_main(int argc, char *argv[])
 
     const char *reporter = hashmap_get_or_default(args, "reporter", "spec");
 
-    if (strcmp(reporter, "spec") == 0) {
+    if (streq(reporter, "spec")) {
         report = console_reporter;
 #ifdef _WIN32
         enable_vt_mode();
@@ -101,9 +103,11 @@ int sigma_test_run_test(union event_args *e, const char *name, test_f test)
 {
     union event_args args = test_event(&e->suite, name, 0);
     report(TEST_BEGIN, &args);
-    int fail_cnt = !setjmp(*e->suite.buf) ? test(&args, on_fail, on_warn), 0 : args.test.fail_cnt;
+    if (!setjmp(*e->suite.buf)) {
+        test(&args, on_fail, on_warn);
+    }
     report(TEST_END, &args);
-    return fail_cnt;
+    return args.test.fail_cnt;
 }
 
 int sigma_test_run_test_collection(const char *file_name, const char *suite_name, ...)
@@ -125,8 +129,8 @@ int sigma_test_run_test_collection(const char *file_name, const char *suite_name
 
     va_start(ap, suite_name);
     while ((test = va_arg(ap, test_run_f)) != NULL) {
-        suite.test_cnt += 1;
-        suite.fail_cnt += test(&args) > 0;
+        args.suite.test_cnt += 1;
+        args.suite.fail_cnt += test(&args) > 0;
     }
     va_end(ap);
 

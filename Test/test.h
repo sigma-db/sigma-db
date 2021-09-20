@@ -5,7 +5,7 @@
 #define SUITE(name) void name(void)
 
 #define TEST(name)                                                                                 \
-    static void test_##name(struct config cfg);                                                    \
+    static void test_##name(union event_args *e, event_handler_f fail, event_handler_f warn);      \
     static int  name(union event_args *e)                                                          \
     {                                                                                              \
         return sigma_test_run_test(e, #name, test_##name);                                         \

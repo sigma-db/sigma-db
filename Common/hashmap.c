@@ -79,7 +79,8 @@ const void *hashmap_get(struct hashmap *map, const void *key)
     return slot != NULL && slot->taken ? slot->val : NULL;
 }
 
-const void* hashmap_get_or_default(hashmap* map, const void* key, const void* default_val) {
+const void *hashmap_get_or_default(hashmap *map, const void *key, const void *default_val)
+{
     const void *val = hashmap_get(map, key);
     return val != NULL ? val : default_val;
 }
@@ -103,7 +104,7 @@ static struct slot *find_slot(struct hashmap *map, size_t hash, const void *key)
 
     for (size_t i = 0; i < map->capacity; i++) {
         /*
-         * Since entries can *not* be deleted, it is safe to assume that when while probing an empty
+         * Since entries *cannot* be deleted, it is safe to assume that when while probing an empty
          * spot is found, the provided key is not currently in the hashmap.
          */
 
