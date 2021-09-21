@@ -25,5 +25,8 @@
     <ClInclude Include="args.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="unittest.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

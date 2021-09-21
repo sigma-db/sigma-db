@@ -71,6 +71,7 @@
       <UseStandardPreprocessor>true</UseStandardPreprocessor>
       <DisableLanguageExtensions>
       </DisableLanguageExtensions>
+      <CompileAs>CompileAsC</CompileAs>
     </ClCompile>
     <Link>
       <SubSystem>

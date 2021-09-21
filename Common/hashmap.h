@@ -2,7 +2,6 @@
 #define HASHMAP_H
 
 #include <stddef.h>
-#include <stdint.h>
 
 typedef struct hashmap hashmap;
 

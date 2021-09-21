@@ -36,14 +36,14 @@ TEST(set)
 TEST(expand)
 {
     hashmap *map;
-    hashmap_create(&map, 2, strcmp); // Allocates space for (2 + 1) * 2 = 6 slots
+    hashmap_create(&map, 1, strcmp); // Allocates space for 2^(1 + 1) = 4 slots
 
     /* Expansion is assumed to occur if prior to an insertion, >50% of available slots are occupied
-     * In our case, this must be after the 4th insertion, i.e. upon the 5th one.
+     * In our case, this must be after the 3rd insertion, i.e. upon the 4th one.
      */
 
-    const char   keys[5][3];
-    const size_t cnt = sizeof(keys) / sizeof(keys[0]);
+    char   keys[5][3];
+    size_t cnt = sizeof(keys) / sizeof(keys[0]);
 
     // Generate keys
     for (int i = 0; i < cnt; i++) {
@@ -58,7 +58,6 @@ TEST(expand)
     // If all previously inserted keys exist, the expansion was successful
     for (int i = 0; i < cnt; i++) {
         EXPECT(hashmap_has(map, keys[i]));
-        const char *value = hashmap_get(map, keys[i]);
     }
 
     hashmap_destroy(map);
